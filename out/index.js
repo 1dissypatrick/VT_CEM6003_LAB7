@@ -16,17 +16,28 @@ const koa_1 = __importDefault(require("koa"));
 const koa_router_1 = __importDefault(require("koa-router"));
 const koa_logger_1 = __importDefault(require("koa-logger"));
 const koa_json_1 = __importDefault(require("koa-json"));
+const koa_bodyparser_1 = __importDefault(require("koa-bodyparser"));
+const koa_passport_1 = __importDefault(require("koa-passport")); // Import passport for authentication
 const articles_1 = require("./routes/articles");
+const special_1 = require("./routes/special"); // Import the new "special" routes
 const app = new koa_1.default();
 const router = new koa_router_1.default();
+// Welcome API Endpoint
 const welcomeAPI = (ctx, next) => __awaiter(void 0, void 0, void 0, function* () {
     ctx.body = { message: "Welcome to the blog API!" };
     yield next();
 });
 router.get('/api/v1', welcomeAPI);
+// Middleware for logging, JSON parsing, and body parsing
 app.use((0, koa_logger_1.default)());
 app.use((0, koa_json_1.default)());
-app.use(articles_1.router.middleware());
+app.use((0, koa_bodyparser_1.default)());
+// Middleware for authentication
+app.use(koa_passport_1.default.initialize());
+// Use routes (articles and special)
+app.use(articles_1.router.routes()).use(articles_1.router.allowedMethods());
+app.use(special_1.router.routes()).use(special_1.router.allowedMethods());
+// Global error handling
 app.use((ctx, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield next();
@@ -36,9 +47,13 @@ app.use((ctx, next) => __awaiter(void 0, void 0, void 0, function* () {
         }
     }
     catch (err) {
-        ctx.body = { err: err };
+        console.error(err); // Log the error for debugging
+        ctx.status = err.status || 500; // Default to internal server error if no status
+        ctx.body = { err: err.message || "An unexpected error occurred" };
     }
 }));
-app.listen(10888, () => {
-    console.log("Koa Started");
+// Start the server
+const PORT = 10888;
+app.listen(PORT, () => {
+    console.log(`Koa Started on Port ${PORT}`);
 });

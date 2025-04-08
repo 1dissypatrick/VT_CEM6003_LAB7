@@ -49,6 +49,8 @@ exports.router = void 0;
 const koa_router_1 = __importDefault(require("koa-router"));
 const koa_bodyparser_1 = __importDefault(require("koa-bodyparser"));
 const model = __importStar(require("../models/articles"));
+const auth_1 = require("../controllers/auth");
+const validation_1 = require("../controllers/validation");
 const router = new koa_router_1.default({ prefix: '/api/v1/articles' });
 exports.router = router;
 const getAll = (ctx, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -87,7 +89,7 @@ const getById = (ctx, next) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const updateArticle = (ctx, next) => __awaiter(void 0, void 0, void 0, function* () {
     let id = +ctx.params.id;
-    //let {title, fullText} = ctx.request.body;
+    // let {title, fullText} = ctx.request.body;
     let c = ctx.request.body;
     let result = yield model.update(c, id);
     if (result) {
@@ -104,7 +106,7 @@ const deleteArticle = (ctx, next) => __awaiter(void 0, void 0, void 0, function*
     yield next();
 });
 router.get('/', getAll);
-router.post('/', (0, koa_bodyparser_1.default)(), createArticle);
+router.post('/', auth_1.basicAuth, (0, koa_bodyparser_1.default)(), validation_1.validateArticle, createArticle);
 router.get('/:id([0-9]{1,})', getById);
-router.put('/:id([0-9]{1,})', (0, koa_bodyparser_1.default)(), updateArticle);
+router.put('/:id([0-9]{1,})', auth_1.basicAuth, (0, koa_bodyparser_1.default)(), validation_1.validateArticle, updateArticle);
 router.delete('/:id([0-9]{1,})', deleteArticle);

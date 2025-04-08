@@ -1,7 +1,8 @@
 import Router, {RouterContext} from "koa-router";
 import bodyParser from "koa-bodyparser";
 import * as model from "../models/articles";
-
+import { basicAuth } from '../controllers/auth';
+import {validateArticle} from '../controllers/validation'; 
 
 
 
@@ -67,9 +68,10 @@ let article = await model.deleteById(id)
 }
 
 router.get('/', getAll);
-router.post('/',  bodyParser(),  createArticle);
+router.post('/', basicAuth, bodyParser(), validateArticle, createArticle); 
 router.get('/:id([0-9]{1,})', getById);
-router.put('/:id([0-9]{1,})',  bodyParser(), updateArticle);
+router.put('/:id([0-9]{1,})', basicAuth, bodyParser(), validateArticle, 
+updateArticle); 
 router.delete('/:id([0-9]{1,})',  deleteArticle);
 
 export { router };
